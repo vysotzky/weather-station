@@ -1,34 +1,39 @@
+<div class="modal fade " id="modulesSavedModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Zmiany zapisane</h5>
+            </div>
+            <div class="modal-body">
+                Nowe sterowniki zostaną wczytane po ponownym włączeniu urządzenia
+            </div>
+            <div class="modal-footer">
+                <a href="/reboot" class="btn btn-secondary">Zrestartuj urządzenie</a>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">Ustawienia</h1>
 </div>
 <div id="settings">
     <div class="row">
         <div class="col-xl-3 col-md-6 mb-4">
-            <h4>Moduły</h4>
-            {% set modulOpis = ({"temperature":"Czujnik temperatury", "pressure":"Czujnik ciśnienia", "heel":"Czujnik przechylu", "humidity":"Czujnik wilgotnosci", 
-        "forecast":"Prognoza pogody"})	%}
-            {%for module in moduleList.items() %}
-            <div class="module">
-                <label>
-                    {% if  modulOpis[module[0]] is defined %}
-                    {{ modulOpis[module[0]] }}
-                    {% else %}
-                    {{module[0]}}
-                    {%endif%}
-                </label>
-                <select class="wide" name="{{module[0]}}">
-                    {%for m in moduleList[module[0]].items() %}
-                    <option{%if m[1] == settings.get("modules", module[0]) %} selected{%endif%}>{{m[1]}}</option>
-                        {%endfor%}
+            <h4>Logbook</h4>
+            <div class="select-box">
+                <label>Częstotliwość zapisywania danych</label>
+                <select class="wide" name="logFreq" id="logFreq">
+                    <option value="1">minuta</option>
+                    <option value="5">5 minut</option>
+                    <option value="10">10 minut</option>
+                    <option value="15">15 minut</option>
+                    <option value="30">30 minut</option>
+                    <option value="45">45 minut</option>
+                    <option value="60">godzina</option>
                 </select>
             </div>
-            {%endfor%}
             <p></p>
-            <button class="btn btn-secondary btn-md" id="save-modules">
-                Zapisz
-            </button>
-            <p></p>
-            <br />
             <h4>Ekran</h4>
             <div class="box">
                 <label>
@@ -39,6 +44,32 @@
                         class="slider" id="brightness">
                 </div>
             </div>
+            <p></p>
+            <br/>
+            <h4>Moduły</h4>
+            {% set modulOpis = ({"temperature":"Czujnik temperatury", "pressure":"Czujnik ciśnienia", "heel":"Czujnik przechylu", "humidity":"Czujnik wilgotnosci", 
+        "forecast":"Prognoza pogody"})	%}
+            {%for module in moduleList.items() %}
+            <div class="select-box">
+                <label>
+                    {% if  modulOpis[module[0]] is defined %}
+                    {{ modulOpis[module[0]] }}
+                    {% else %}
+                    {{module[0]}}
+                    {%endif%}
+                </label>
+                <select class="wide module" name="{{module[0]}}">
+                    {%for m in moduleList[module[0]].items() %}
+                    <option{%if m[1] == settings.get("modules", module[0]) %} selected{%endif%}>{{m[1]}}</option>
+                        {%endfor%}
+                </select>
+            </div>
+            {%endfor%}
+            <p></p>
+            <button class="btn btn-secondary btn-md" id="save-modules">
+                Zastosuj moduły
+            </button>
+            <p></p>
         </div>
     </div>
     <hr>
@@ -60,19 +91,25 @@
 
     $("#save-modules").click(function () {
         var modules = {};
-        $("select").each(function (index) {
-            modules[$(this).attr("name")] = $(this).val();
+        $(".module").each(function (index) {
+            if ($(this).val() != '') {
+                modules[$(this).attr("name")] = $(this).val();
+            }
         });
-
+        console.log(modules);
         const http = new XMLHttpRequest()
         http.open('POST', 'save-modules')
         http.setRequestHeader('Content-type', 'application/json')
-        http.send(JSON.stringify(modules)); 
-        http.onload = function() {
-            // Do whatever with response
-            alert(http.responseText)
+        http.send(JSON.stringify(modules));
+        http.onload = function () {
+            $('#modulesSavedModal').modal('show');
         }
     });
+
+    $("#logFreq").val("{{settings.get('general', 'logbookFrequency')}}").change();
+    $('#logFreq').niceSelect('update');
+
+    $("#logFreq").on("change", function (event, ui) { ajax_get('set-logbook-frequency/' + $(this).val()); });
 
     $("#brightness").on("change", function (event, ui) { ajax_get('set-brightness/' + brightness.value, setBrightness); });
 </script>

@@ -3,6 +3,7 @@ from collections import defaultdict
 import importlib
 import threading
 import os
+import sys
 
 try:
     from configparser import ConfigParser
@@ -10,7 +11,7 @@ except ImportError:
     from ConfigParser import ConfigParser  
 	
 
-app = Flask(__name__, static_url_path='', 
+app = Flask(__name__, static_url_path='',   
             static_folder='gui/static',
             template_folder='gui/templates')
 
@@ -27,7 +28,8 @@ for k, v in config.items("modules"):
     try:
         module[k] =  importlib.import_module("modules."+k+"."+v)
     except:
-        print("error: module "+v+" for "+k+" not found")
+        print("error: loading module "+v+" for "+k+" failed")
+        print(sys.exc_info())
         errors[k] = v
 
 def multi_dict(K, type): 
@@ -104,11 +106,30 @@ def UISettingsSetBrightness(brightness):
             pass
     return str(brt)
 
+@app.route("/set-logbook-frequency/<frequency>")
+def UISettingsSetLogbookFrequency(frequency):
+    try:
+        freq = int(frequency)
+    except:
+        freq = 10
+    
+    if freq >= 1 & freq<=60:
+        try:
+            config.set("general", "logbookFrequency", str(freq))
+            saveConfig()
+        except:
+            pass
+    return str(freq)
+
 @app.route('/save-modules', methods=['POST']) 
 def UISettingsSaveModules():
     modules = request.get_json(force=True)
-    print(modules)
-    return "xd"
+    try:
+        config['modules'] = modules
+        saveConfig()
+        return "success"
+    except:
+        return "error"
 
 @app.route('/index')
 @app.route('/')
@@ -122,11 +143,16 @@ def sensors():
 @app.route('/shutdown')
 def shutdown():
     os.system("shutdown now -h") 
-    return render_template('main.html')
+    return ""
+
+@app.route('/reboot')
+def reboot():
+    os.system("reboot") 
+    return ""
 	
 @app.route('/close')
 def close():
-    #os.system("pkill chromium") 
+    os.system("pkill chromium") 
     return ""
 
 @app.route('/settings')

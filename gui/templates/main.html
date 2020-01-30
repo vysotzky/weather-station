@@ -18,7 +18,7 @@
             height: 300px;
         }
 
-        .module {
+        .select-box {
             padding-bottom: 50px;
         }
 
@@ -131,7 +131,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link " href="#" id="shutdown" role="button" data-toggle="modal"
-                            data-target="#wylacz">
+                            data-target="#shutdownModal">
                             <i class="fas fa-power-off fa-2x"></i>
                         </a>
                     </li>
@@ -140,11 +140,11 @@
             <!-- End of Topbar -->
             <!-- Begin Page Content -->
             <div class="container">
-                <div class="modal fade " id="bladModuly" tabindex="-1" role="dialog">
+                <div class="modal fade " id="modulesErrorModal" tabindex="-1" role="dialog">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel">Błąd podczas wczytywania modułów!</h5>
+                                <h5 class="modal-title">Błąd podczas wczytywania modułów!</h5>
                             </div>
                             <div class="modal-body">
                                 Wystąpił błąd podczas wczytywania następujących modułów:<br />
@@ -160,11 +160,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal fade " id="wylacz" tabindex="-1" role="dialog">
+                <div class="modal fade " id="shutdownModal" tabindex="-1" role="dialog">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel">Wyłączyć stację?</h5>
+                                <h5 class="modal-title">Wyłączyć stację?</h5>
                             </div>
                             <div class="modal-body">
                                 Urządzenie zostanie wyłączone
@@ -286,7 +286,7 @@
 
 
         {% if errorList | length > 0 %}
-        $('#bladModuly').modal('show');
+        $('#modulesErrorModal').modal('show');
         {% endif %}
 
         updateTime();
