@@ -1,0 +1,298 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Weather Station</title>
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed&display=swap" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css?2" rel="stylesheet">
+    <link rel="stylesheet" href="css/nice-select.css">
+    <style>
+        #settings {
+            overflow-y: auto;
+            overflow-x: hidden;
+            height: 300px;
+        }
+
+        .module {
+            padding-bottom: 50px;
+        }
+
+        .form-control:focus {
+            box-shadow: none;
+        }
+
+        select {
+            background: white !important;
+            color: #FFF;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        #loading {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: gray;
+            opacity: 75%;
+        }
+
+        .slidecontainer {
+            width: 100%;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 15px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+
+        .slider:hover {
+            opacity: 1;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: gray;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: gray;
+            cursor: pointer;
+        }
+
+        /* width */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        /* Track */
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+        }
+
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+
+<body id="page-top">
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top shadow">
+                <a class="navbar-brand" id="time" href="javascript:void(0)" style="margin-left:48px"></a>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link " href="#" stacja-ekran="sensors" role="button">
+                            <i class="fas fa-thermometer-full fa-2x "></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link " href="#" stacja-ekran="sensors" role="button">
+                            <i class="fas fa-cloud fa-2x "></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link " href="#" role="button">
+                            <i class="fas fa-book fa-2x "></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link " href="#" stacja-ekran="settings">
+                            <i class="fas fa-cog fa-2x "></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link " href="#" id="shutdown" role="button" data-toggle="modal"
+                            data-target="#wylacz">
+                            <i class="fas fa-power-off fa-2x"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <!-- End of Topbar -->
+            <!-- Begin Page Content -->
+            <div class="container">
+                <div class="modal fade " id="bladModuly" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Błąd podczas wczytywania modułów!</h5>
+                            </div>
+                            <div class="modal-body">
+                                Wystąpił błąd podczas wczytywania następujących modułów:<br />
+                                <ul>
+                                    {%for error in errorList.items() %}
+                                    <li><strong>{{error[0]}}:</strong> {{error[1]}}</li>
+                                    {%endfor%}
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-dismiss="modal">Potwierdź</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade " id="wylacz" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Wyłączyć stację?</h5>
+                            </div>
+                            <div class="modal-body">
+                                Urządzenie zostanie wyłączone
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Anuluj</button>
+                                <a href="/shutdown" class="btn btn-danger">Wyłącz</a>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="ekran"></div>
+            </div>
+        </div>
+    </div>
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="js/jquery.nice-select.min.js"></script>
+
+    <script>
+        var loading = false;
+        var sensors = {};
+        var intervals = {};
+        var working = {};
+
+
+        function ajax_get(query, callback) {
+            var wQuery = query.split("/")[0];
+            if (working[wQuery] == true) {
+                return;
+            }
+
+            working[wQuery] = true;
+            const Http = new XMLHttpRequest();
+            const url = query;
+            Http.open("GET", url);
+            Http.send();
+            Http.onreadystatechange = (e) => {
+                if (Http.readyState == 4 && Http.status == 200 && Http.responseText != "error") {
+                    if (typeof callback === 'function') {
+                        callback(Http.responseText);
+                    }
+                }
+                working[wQuery] = false;
+
+            }
+        }
+
+        function get(query, callback) {
+            return call('/get/', query, callback);
+        }
+
+
+        function set(query, callback) {
+            return call('/set/', query, callback);
+        }
+
+        function updateTime() {
+            var days = ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'];
+            var today = new Date();
+            var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+            var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+            var dayName = days[today.getDay()];
+
+            var dateTime = date + ' ' + time;
+
+            var hour = time = ('0' + today.getHours()).slice(-2) + ':' + ('0' + today.getMinutes()).slice(-2);
+            var t = dayName.toUpperCase() + " &nbsp; " + hour;
+            document.getElementById('time').innerHTML = t;
+
+            setTimeout(updateTime, 1000);
+        }
+
+        function loadScreen(ekran) {
+            // $("#loading").fadeIn(50);
+
+            if (loading) return;
+            loading = true;
+
+            if (ekran != 'sensors') {
+                clearIntervals();
+            }
+            // $("#ekran").html("Wczytywanie...");
+
+            $("#ekran").load(ekran, function (response, status, xhr) {
+                if (status == "error") {
+                    var msg = "Wystąpił następujący błąd: ";
+                    $("#ekran").html(msg + xhr.status + " " + xhr.statusText);
+                }
+                loading = false;
+            });
+        }
+
+        function goToSystem() {
+            window.location.href = "/close";
+
+        }
+
+        function clearIntervals() {
+            for (var c in intervals) {
+                clearInterval(intervals[c]);
+                delete intervals[c];
+            }
+            intervals = {};
+        }
+
+        $("[stacja-ekran]").click(function () {
+            loadScreen($(this).attr('stacja-ekran'));
+        });
+
+        $('#shutdown').on('mousedown', function () {
+            timeoutId = setTimeout(goToSystem, 5000);
+        }).on('mouseup mouseleave', function () {
+            if (typeof timeoutId !== "undefined") {
+                clearTimeout(timeoutId);
+            }
+        });
+
+
+        {% if errorList | length > 0 %}
+        $('#bladModuly').modal('show');
+        {% endif %}
+
+        updateTime();
+        loadScreen('sensors');
+    </script>
+    <div id="loading"></div>
+</body>
+
+</html>

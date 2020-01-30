@@ -1,0 +1,78 @@
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Ustawienia</h1>
+</div>
+<div id="settings">
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <h4>Moduły</h4>
+            {% set modulOpis = ({"temperature":"Czujnik temperatury", "pressure":"Czujnik ciśnienia", "heel":"Czujnik przechylu", "humidity":"Czujnik wilgotnosci", 
+        "forecast":"Prognoza pogody"})	%}
+            {%for module in moduleList.items() %}
+            <div class="module">
+                <label>
+                    {% if  modulOpis[module[0]] is defined %}
+                    {{ modulOpis[module[0]] }}
+                    {% else %}
+                    {{module[0]}}
+                    {%endif%}
+                </label>
+                <select class="wide" name="{{module[0]}}">
+                    {%for m in moduleList[module[0]].items() %}
+                    <option{%if m[1] == settings.get("modules", module[0]) %} selected{%endif%}>{{m[1]}}</option>
+                        {%endfor%}
+                </select>
+            </div>
+            {%endfor%}
+            <p></p>
+            <button class="btn btn-secondary btn-md" id="save-modules">
+                Zapisz
+            </button>
+            <p></p>
+            <br />
+            <h4>Ekran</h4>
+            <div class="box">
+                <label>
+                    Jasność
+                </label>
+                <div class="slidecontainer">
+                    <input type="range" min="15" max="255" value="{{settings.get("general", "brightness")}}"
+                        class="slider" id="brightness">
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <p class="text-uppercase font-weight-light">Informacje o urządzeniu</p>
+    <blockquote class="blockquote">
+        <p class="mb-0"><strong>Statkowa stacja meteorologiczna w oparciu o mikrokomputer Raspberry Pi</strong></p>
+        <p>Dorian Wysocki &nbsp; <img src="img/umg.png" style="height:2em; width:auto;" /> &nbsp; <cite>Uniwersytet
+                Morski w Gdyni</cite></p>
+    </blockquote>
+</div>
+<script>
+    $('select').niceSelect();
+
+    var brightness = document.getElementById("brightness");
+
+    function setBrightness(value) {
+        brightness.value = value;
+    }
+
+    $("#save-modules").click(function () {
+        var modules = {};
+        $("select").each(function (index) {
+            modules[$(this).attr("name")] = $(this).val();
+        });
+
+        const http = new XMLHttpRequest()
+        http.open('POST', 'save-modules')
+        http.setRequestHeader('Content-type', 'application/json')
+        http.send(JSON.stringify(modules)); 
+        http.onload = function() {
+            // Do whatever with response
+            alert(http.responseText)
+        }
+    });
+
+    $("#brightness").on("change", function (event, ui) { ajax_get('set-brightness/' + brightness.value, setBrightness); });
+</script>

@@ -1,0 +1,101 @@
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+  <h1 class="h3 mb-0 text-gray-800">Odczyt sensorów</h1>
+</div>
+<div class="row">
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="shadow h-100 py-2">
+      <div class="card-body">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-uppercase mb-1">TEMPERATURA</div>
+            <div class="h1 mb-0 text-gray-800" id="temperature">-</div>
+          </div>
+          <div class="col-auto">
+            <i class="fas fa-thermometer-half fa-2x text-gray-300"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="shadow h-100 py-2">
+      <div class="card-body">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold  text-uppercase mb-1">CIŚNIENIE</div>
+            <div class="h1 mb-0 text-gray-800" id="pressure">-</div>
+          </div>
+          <div class="col-auto">
+            <i class="fas fa-tachometer-alt fa-2x text-gray-300"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="shadow h-100 py-2">
+      <div class="card-body">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-uppercase mb-1">WILGOTNOŚĆ</div>
+            <div class="h1 mb-0 text-gray-800" id="humidity">-</div>
+          </div>
+          <div class="col-auto">
+            <i class="fas fa-tint fa-2x text-gray-300"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="shadow h-100 py-2">
+      <div class="card-body">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-uppercase mb-1">PRZECHYŁ</div>
+            <div class="h1 mb-0 text-gray-800" id="heel">-</div>
+          </div>
+          <div class="col-auto">
+            <i class="fas fa-ship fa-2x text-gray-300"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function setTemperature(value) {
+    setFieldValue('temperature', value, " °C");
+  }
+
+  function setPressure(value) {
+    setFieldValue('pressure', value, " hPa");
+  }
+
+  function setHumidity(value) {
+    setFieldValue('humidity', value, "%");
+  }
+
+  function setHeel(value) {
+    setFieldValue('heel', value, "°");
+  }
+
+  function setFieldValue(field, value, prefix) {
+    var field = document.getElementById(field);
+    if (field) {
+      field.innerHTML = value + prefix;
+    }
+  }
+
+  function updateSensor(sensor) {
+    var func = "set" + sensor.charAt(0).toUpperCase() + sensor.slice(1);
+    ajax_get('get-' + sensor, window[func]);
+  }
+
+  sensors = { 'temperature': 1000, 'pressure': 1000, 'humidity': 1000, 'heel': 25 };
+
+  for (var c in sensors) {
+    intervals[c] = setInterval(updateSensor, sensors[c], c);
+  }
+
+</script>
