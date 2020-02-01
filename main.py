@@ -18,7 +18,7 @@ app = Flask(__name__, static_url_path='',
 
 config_path = 'ustawienia.ini'
 
-config = ConfigParser()
+config = ConfigParser(allow_no_value=True)
 config.read(config_path)
 
 module = {}
@@ -140,6 +140,10 @@ def index():
 def sensors():
     return render_template('sensors.html')
 
+@app.route('/logbook')
+def logbook():
+    return render_template('logbook.html')
+
 @app.route('/shutdown')
 def shutdown():
     os.system("shutdown now -h") 
@@ -160,7 +164,7 @@ def settings():
     modulesList = {}
     for k, v in config.items("modules"):
         modulesList[k] =  getModules(k)
-    return render_template('settings.html', moduleList = modulesList, settings = config )
+    return render_template('settings.html', moduleList = modulesList)
 
 
 def startChromium():
@@ -173,10 +177,29 @@ def saveConfig():
     return
 
 
+#@app.context_processor
+#def global_vars():
+#    return dict(settings=config)
+
+@app.context_processor
+def utility_processor():
+    def get_config(section, option):
+        try:
+            value = config.get(section, option)
+        except:
+            value = ""
+        return value
+    return dict(get_config=get_config)
+
+@app.errorhandler(Exception)
+def exception_handler(error):
+    print(error)
+    return render_template('error.html', error=error), 500
+
 if __name__ == "__main__":
     app.jinja_env.auto_reload = True
     app.config['TEMPLATES_AUTO_RELOAD'] = True
     if os.name != 'nt':
         thread = threading.Thread(target = startChromium, args=[])
         thread.start()
-    app.run(host= '0.0.0.0', port=int("80"))
+    app.run(host= '0.0.0.0', port=int("80"), debug=True)

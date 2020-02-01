@@ -1,0 +1,47 @@
+<div class="modal fade " id="modulesSavedModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Zmiany zapisane</h5>
+            </div>
+            <div class="modal-body">
+                Nowe sterowniki zostaną wczytane po ponownym włączeniu urządzenia
+            </div>
+            <div class="modal-footer">
+                <a href="/reboot" class="btn btn-secondary">Zrestartuj urządzenie</a>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Logbook</h1>
+</div>
+<div id="settings">
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div id="logbook">
+
+            </div>
+        </div>
+    </div>
+    <script>
+        function logbookToTable() {
+            var result = "<table border=1>";
+
+            for (var key in logbook) {
+                if (!logbook.hasOwnProperty(key)) continue;
+                var entry = logbook[key];
+                result += "<tr>";
+                result += "<td><strong>" + key + "</strong></td>";
+                for (var field in entry) {
+                    if (!entry.hasOwnProperty(field)) continue;
+                    result += "<td>" + entry[field] + "</td>";
+                }
+                result += "</tr>";
+            }
+            result += "</table>";
+            $('#logbook').html(result); // And add to container
+        }
+        logbookToTable();
+    </script>

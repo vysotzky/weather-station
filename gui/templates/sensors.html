@@ -64,38 +64,10 @@
   </div>
 </div>
 <script>
-  function setTemperature(value) {
-    setFieldValue('temperature', value, " °C");
-  }
 
-  function setPressure(value) {
-    setFieldValue('pressure', value, " hPa");
-  }
-
-  function setHumidity(value) {
-    setFieldValue('humidity', value, "%");
-  }
-
-  function setHeel(value) {
-    setFieldValue('heel', value, "°");
-  }
-
-  function setFieldValue(field, value, prefix) {
-    var field = document.getElementById(field);
-    if (field) {
-      field.innerHTML = value + prefix;
-    }
-  }
-
-  function updateSensor(sensor) {
-    var func = "set" + sensor.charAt(0).toUpperCase() + sensor.slice(1);
-    ajax_get('get-' + sensor, window[func]);
-  }
-
-  sensors = { 'temperature': 1000, 'pressure': 1000, 'humidity': 1000, 'heel': 25 };
-
+if(Object.keys(intervals).length == 0) { 
   for (var c in sensors) {
     intervals[c] = setInterval(updateSensor, sensors[c], c);
   }
-
+}
 </script>

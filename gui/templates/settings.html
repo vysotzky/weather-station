@@ -40,12 +40,12 @@
                     Jasność
                 </label>
                 <div class="slidecontainer">
-                    <input type="range" min="15" max="255" value="{{settings.get("general", "brightness")}}"
+                    <input type="range" min="15" max="255" value="{{get_config("general", "brightness")}}"
                         class="slider" id="brightness">
                 </div>
             </div>
             <p></p>
-            <br/>
+            <br />
             <h4>Moduły</h4>
             {% set modulOpis = ({"temperature":"Czujnik temperatury", "pressure":"Czujnik ciśnienia", "heel":"Czujnik przechylu", "humidity":"Czujnik wilgotnosci", 
         "forecast":"Prognoza pogody"})	%}
@@ -60,7 +60,7 @@
                 </label>
                 <select class="wide module" name="{{module[0]}}">
                     {%for m in moduleList[module[0]].items() %}
-                    <option{%if m[1] == settings.get("modules", module[0]) %} selected{%endif%}>{{m[1]}}</option>
+                    <option{%if m[1] == get_config("modules", module[0]) %} selected{%endif%}>{{m[1]}}</option>
                         {%endfor%}
                 </select>
             </div>
@@ -96,7 +96,6 @@
                 modules[$(this).attr("name")] = $(this).val();
             }
         });
-        console.log(modules);
         const http = new XMLHttpRequest()
         http.open('POST', 'save-modules')
         http.setRequestHeader('Content-type', 'application/json')
@@ -106,10 +105,16 @@
         }
     });
 
-    $("#logFreq").val("{{settings.get('general', 'logbookFrequency')}}").change();
+    $("#logFreq").val("{{get_config('general', 'logbookFrequency')}}").change();
     $('#logFreq').niceSelect('update');
 
-    $("#logFreq").on("change", function (event, ui) { ajax_get('set-logbook-frequency/' + $(this).val()); });
+    $("#logFreq").on("change", function (event, ui) {
+        var newFreq = $(this).val();
+        if (newFreq >= 1) {
+            logbookFrequency = newFreq;
+            ajax_get('set-logbook-frequency/' + newFreq);
+        }
+    });
 
     $("#brightness").on("change", function (event, ui) { ajax_get('set-brightness/' + brightness.value, setBrightness); });
 </script>

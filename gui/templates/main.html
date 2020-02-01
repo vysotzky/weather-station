@@ -120,7 +120,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link " href="#" role="button">
+                        <a class="nav-link " href="#" role="button" stacja-ekran="logbook">
                             <i class="fas fa-book fa-2x "></i>
                         </a>
                     </li>
@@ -186,10 +186,17 @@
     <script src="js/jquery.nice-select.min.js"></script>
 
     <script>
+        var sensors = { 'temperature': 1000, 'pressure': 1000, 'humidity': 1000, 'heel': 25 };
+        var fetchSensorsEverywhere = false;
+
+        // ------------- ///
+        var logbookFrequency = "{{get_config('general', 'logbookfrequency')|default('5', true)}}";
         var loading = false;
-        var sensors = {};
         var intervals = {};
+        var logbook = {};
         var working = {};
+        var now = new Date();
+        var fullDate = '';
 
 
         function ajax_get(query, callback) {
@@ -223,16 +230,24 @@
             return call('/set/', query, callback);
         }
 
+        function AddZero(num) {
+            return (num >= 0 && num < 10) ? "0" + num : num + "";
+        }
+
+
         function updateTime() {
+            now = new Date();
+            fullDate = [[AddZero(now.getDate()),
+            AddZero(now.getMonth() + 1),
+            now.getFullYear()].join("/"),
+            [AddZero(now.getHours()),
+            AddZero(now.getMinutes())].join(":"),
+            now.getHours() >= 12 ? "PM" : "AM"].join(" ");
+
+
             var days = ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'];
-            var today = new Date();
-            var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-            var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-            var dayName = days[today.getDay()];
-
-            var dateTime = date + ' ' + time;
-
-            var hour = time = ('0' + today.getHours()).slice(-2) + ':' + ('0' + today.getMinutes()).slice(-2);
+            var dayName = days[now.getDay()];
+            var hour = time = ('0' + now.getHours()).slice(-2) + ':' + ('0' + now.getMinutes()).slice(-2);
             var t = dayName.toUpperCase() + " &nbsp; " + hour;
             document.getElementById('time').innerHTML = t;
 
@@ -245,15 +260,14 @@
             if (loading) return;
             loading = true;
 
-            if (ekran != 'sensors') {
+            if (ekran != 'sensors' && fetchSensorsEverywhere === true) {
                 clearIntervals();
             }
-            // $("#ekran").html("Wczytywanie...");
 
             $("#ekran").load(ekran, function (response, status, xhr) {
                 if (status == "error") {
                     var msg = "Wystąpił następujący błąd: ";
-                    $("#ekran").html(msg + xhr.status + " " + xhr.statusText);
+                    document.documentElement.innerHTML = response;
                 }
                 loading = false;
             });
@@ -261,7 +275,6 @@
 
         function goToSystem() {
             window.location.href = "/close";
-
         }
 
         function clearIntervals() {
@@ -283,6 +296,45 @@
                 clearTimeout(timeoutId);
             }
         });
+
+        function setTemperature(value) {
+            updateUI('temperature', value, " °C");
+        }
+
+        function setPressure(value) {
+            updateUI('pressure', value, " hPa");
+        }
+
+        function setHumidity(value) {
+            updateUI('humidity', value, "%");
+        }
+
+        function setHeel(value) {
+            updateUI('heel', value, "°");
+        }
+
+        function updateUI(field, value, prefix) {
+            var fieldElement = document.getElementById(field);
+            var content = value + prefix;
+
+            if (fieldElement) {
+                fieldElement.innerHTML = content;
+            }
+
+            if (now.getMinutes() % logbookFrequency === 0) {
+                if (!(fullDate in logbook)) {
+                    logbook[fullDate] = {};
+                }
+                if (!(field in logbook[fullDate])) {
+                    logbook[fullDate][field] = content; 
+                }
+            }
+        }
+
+        function updateSensor(sensor) {
+            var func = "set" + sensor.charAt(0).toUpperCase() + sensor.slice(1);
+            ajax_get('get-' + sensor, window[func]);
+        }
 
 
         {% if errorList | length > 0 %}
