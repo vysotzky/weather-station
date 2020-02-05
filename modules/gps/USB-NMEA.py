@@ -1,5 +1,4 @@
 import time
-import serial
 import pynmea2
 import sys
 try:
