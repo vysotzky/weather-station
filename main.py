@@ -177,10 +177,6 @@ def saveConfig():
     return
 
 
-#@app.context_processor
-#def global_vars():
-#    return dict(settings=config)
-
 @app.context_processor
 def utility_processor():
     def get_config(section, option):
@@ -199,7 +195,10 @@ def exception_handler(error):
 if __name__ == "__main__":
     app.jinja_env.auto_reload = True
     app.config['TEMPLATES_AUTO_RELOAD'] = True
+    
+    debugMode = True
     if os.name != 'nt':
         thread = threading.Thread(target = startChromium, args=[])
         thread.start()
-    app.run(host= '0.0.0.0', port=int("80"), debug=True)
+        debugMode = False
+    app.run(host= '0.0.0.0', port=int("80"), debug=debugMode)
