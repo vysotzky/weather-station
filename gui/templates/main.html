@@ -1,5 +1,4 @@
 <html>
-
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,99 +10,9 @@
     <link href="css/roboto-condensed-font.css" rel="stylesheet">
     <link href="css/sb-admin-2.min.css?2" rel="stylesheet">
     <link href="css/nice-select.css" rel="stylesheet">
+    <link href="css/misc.css" rel="stylesheet">
     <link rel="icon" href="data:,">
-    <style>
-        #settings {
-            overflow-y: auto;
-            overflow-x: hidden;
-            height: 300px;
-        }
-
-        .select-box {
-            padding-bottom: 50px;
-        }
-
-        .form-control:focus {
-            box-shadow: none;
-        }
-
-        select {
-            background: white !important;
-            color: #FFF;
-            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
-        }
-
-        #loading {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: gray;
-            opacity: 75%;
-        }
-
-        .slidecontainer {
-            width: 100%;
-        }
-
-        .slider {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 15px;
-            border-radius: 5px;
-            background: #d3d3d3;
-            outline: none;
-            opacity: 0.7;
-            -webkit-transition: .2s;
-            transition: opacity .2s;
-        }
-
-        .slider:hover {
-            opacity: 1;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            background: gray;
-            cursor: pointer;
-        }
-
-        .slider::-moz-range-thumb {
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            background: gray;
-            cursor: pointer;
-        }
-
-        /* width */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        /* Track */
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        /* Handle */
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-        }
-
-        /* Handle on hover */
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-    </style>
 </head>
-
 <body id="page-top">
     <div id="content-wrapper" class="d-flex flex-column">
         <div id="content">
@@ -143,8 +52,6 @@
                     </li>
                 </ul>
             </nav>
-            <!-- End of Topbar -->
-            <!-- Begin Page Content -->
             <div class="container">
                 <div class="modal fade " id="modulesErrorModal" tabindex="-1" role="dialog">
                     <div class="modal-dialog" role="document">
@@ -190,7 +97,6 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/jquery.nice-select.min.js"></script>
-
     <script>
         var sensors = { 'temperature': 1000, 'pressure': 1000, 'humidity': 1000, 'heel': 25 };
         var fetchSensorsEverywhere = false;
@@ -239,7 +145,6 @@
         function AddZero(num) {
             return (num >= 0 && num < 10) ? "0" + num : num + "";
         }
-
 
         function updateTime() {
             now = new Date();
@@ -352,5 +257,4 @@
     </script>
     <div id="loading"></div>
 </body>
-
 </html>
