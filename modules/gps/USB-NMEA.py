@@ -33,7 +33,7 @@ def read_nmea_thread():
 
                 fields = array(nmea)
                 if nmea.sentence_type == "GGA":
-                    data['time'] = nmea.timestamp.strftime('%H:%I:%S')
+                    data['time'] = nmea.timestamp.strftime('%H:%M:%S')
                     data['latitude'] = nmea.latitude
                     data['longitude'] = nmea.longitude
                     data['latitude_f'] = ('%02d°%07.4f′' % (abs(nmea.latitude), nmea.latitude_minutes)) + " " + msg.lat_dir

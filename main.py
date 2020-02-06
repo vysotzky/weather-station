@@ -147,6 +147,10 @@ def sensors():
 def logbook():
     return render_template('logbook.html')
 
+@app.route('/gps')
+def gps():
+    return render_template('gps.html')
+
 @app.route('/settings')
 def settings():
     modulesList = {}

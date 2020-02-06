@@ -1,7 +1,16 @@
-#settings {
+
+body {
+    margin: 0; height: 100%; overflow: hidden;
+}
+
+#scroll {
     overflow-y: auto;
     overflow-x: hidden;
     height: 300px;
+}
+
+#gps { 
+    width:95%;
 }
 
 .select-box {
@@ -68,7 +77,7 @@ select {
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-    background: #888;
+    background: rgb(166, 166, 166);
 }
 
 /* Handle on hover */

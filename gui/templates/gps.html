@@ -1,0 +1,188 @@
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Dane z odbiornika GPS</h1>
+    <span class="float-right text-uppercase" id="last_update" style="display:none;">Ostatnia aktualizacja <span
+            id="gps_time" class="font-weight-bold"></span> UTC</span>
+</div>
+<div id="no-scroll">
+    <div id="gps">
+        <div class="row">
+            <div class="col-xl-6 col-md-6 mb-4">
+                <div class="card" style="height:80px !important;">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="h6 font-weight-bold text-primary text-uppercase mb-1">
+                                    Pozycja
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="position">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6 col-md-6 mb-4">
+                <div class="card " style="height:80px !important;">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="h6 font-weight-bold text-primary text-uppercase mb-1">
+                                    Prędkość nad dnem (KT)
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="speed">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <!-- Content Column -->
+            <div class="col-lg-6 col-md-6 mb-4">
+                <!-- Project Card Example -->
+                <div class="card  mb-4" style="height:200px">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary text-uppercase">Wartości DOP</h6>
+                    </div>
+                    <div class="card-body" id="dop">
+                        <h1 style="text-align:center">-</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6 mb-4">
+                <div class="card  mb-4" style="height:200px">
+                    <div class="card-body">
+                        <div id="canvas-wrapper">
+                            <canvas id="canvas" height="200"
+                                style="top:-5; margin-top:-20; z-index: 99999999;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var GPSData;
+    function getGPSData() {
+        ajax_get('get-gps', updateGPSInfo)
+    }
+
+    function updateGPSInfo(data) {
+        if (currentScreen != 'gps') {
+            return;
+        }
+
+        try {
+            GPSData = JSON.parse(data);
+        } catch {
+            GPSData = false;
+        }
+
+
+        if (GPSData) {
+            var position, speed = '-';
+            var dops = '<h1 style="text-align:center">-</h1>';
+            if (GPSData.hasOwnProperty('latitude_f') && GPSData.hasOwnProperty('longitude_f')) {
+                position = GPSData['latitude_f'] + ', ' + GPSData['longitude_f'];
+            }
+
+            if (GPSData.hasOwnProperty('sog')) {
+                speed = GPSData['sog'];
+            }
+
+            if (GPSData.hasOwnProperty('dop') && Object.keys(GPSData['dop']).length > 0) {
+                dops = '';
+                for (dop in GPSData['dop']) {
+                    dops += '<h4 class="small font-weight-bold text-uppercase">' + dop + ' <span class="float-right">' + GPSData['dop'][dop] + '</span></h4>' + "\n";
+                }
+            }
+
+            if (GPSData.hasOwnProperty('time')) {
+                $("#last_update").show();
+                $("#gps_time").html(GPSData['time']);
+            }
+
+            if (GPSData.hasOwnProperty('visible_satelites')) {
+                sateliteMap();
+            }
+
+            $("#position").html(position);
+            $("#speed").html(speed);
+            $("#dop").html(dops);
+        }
+        setTimeout(getGPSData, 1000);
+    }
+
+
+    function drawSatelite(azimuth, elevation, label, used = false) {
+        var distance = 1 - elevation / 90;
+        var angle = azimuth;
+        var x = centerX - radius * Math.sin(-angle * Math.PI / 180) * distance;
+        var y = centerY - radius * Math.cos(-angle * Math.PI / 180) * distance;
+
+        ctx.beginPath();
+        ctx.arc(x, y, 8, 0, 2 * Math.PI);
+        ctx.fillStyle = "white";
+        ctx.fill();
+
+        ctx.fillStyle = "black";
+        ctx.strokeStyle = 'black';
+
+        if (used) {
+            ctx.stroke();
+        }
+
+        ctx.font = 13;
+        ctx.fillText(label, x - 6, y + 3);
+    }
+
+    function sateliteMap() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "black";
+        ctx.strokeStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        ctx.strokeStyle = 'lightgray';
+        var deltaDeg = 15;
+        for (var i = deltaDeg; i < 90; i += deltaDeg) {
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius / (90 / i), 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+
+        ctx.beginPath();
+        ctx.strokeWidth = 1;
+        x = Math.floor(centerX) + 0.5;
+        y = Math.floor(centerY) + 0.5;
+        ctx.moveTo(x, y - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.moveTo(x - radius, y);
+        ctx.lineTo(x + radius, y);
+        ctx.stroke();
+
+        var satelites = GPSData.hasOwnProperty('visible_satelites') ? GPSData['visible_satelites'] : false;
+        if (satelites !== false && Object.keys(satelites).length > 0) {
+            for(key in satelites){
+                var u = false;
+                if(GPSData['used_satelites'].includes(key)){
+                    u = true;
+                }
+                drawSatelite(satelites[key]['azimuth'], satelites[key]['elevation'], key, u);
+            }
+        }
+    }
+
+    var canvasWrapperRect = document.getElementById('canvas-wrapper').getBoundingClientRect();
+    canvas.width = canvasWrapperRect.width;
+
+    var ctx = canvas.getContext('2d');
+    var centerX = canvas.width / 2;
+    var centerY = canvas.height / 2;
+    var radius = 90;
+
+
+
+    getGPSData();
+</script>
