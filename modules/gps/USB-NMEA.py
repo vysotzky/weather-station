@@ -1,6 +1,6 @@
 import time
 import pynmea2
-import sys
+import sys, os
 try:
     import thread
 except ImportError:
@@ -8,7 +8,10 @@ except ImportError:
 import time
 
 data = {}
-serial = '/dev/ttyACM0'
+if os.name != 'nt':
+    serial = '/dev/ttyACM0'
+else:
+    serial = 'C:/inzynierka/nmea.txt'
 
 def array(msg):
     return {k: getattr(msg, k) for k in msg.name_to_idx}
@@ -54,6 +57,7 @@ def read_nmea_thread():
                     data['sog'] = str(nmea.spd_over_grnd_kts)
         except:
             pass
+
 
 thread.start_new_thread(read_nmea_thread, ())
 

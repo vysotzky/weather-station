@@ -4,6 +4,7 @@ import importlib
 import threading
 import os
 import sys
+import json
 
 try:
     from configparser import ConfigParser
@@ -31,12 +32,6 @@ for k, v in config.items("modules"):
         print("error: loading module "+v+" for "+k+" failed")
         print(sys.exc_info())
         errors[k] = v
-
-def multi_dict(K, type): 
-    if K == 1: 
-        return defaultdict(type) 
-    else: 
-        return defaultdict(lambda: multi_dict(K-1, type)) 
 
 def getModules(name):
     i=0
@@ -88,6 +83,14 @@ def UIGetHeel():
     except:
         heel = "error"
     return str(heel)
+
+@app.route("/get-gps")
+def UIGetGPSData():
+    try:
+        gps = module['gps'].getGPSData()
+    except:
+        gps = "error"
+    return  json.dumps(gps)
 
 @app.route("/set-brightness/<brightness>")
 def UISettingsSetBrightness(brightness):
@@ -144,6 +147,13 @@ def sensors():
 def logbook():
     return render_template('logbook.html')
 
+@app.route('/settings')
+def settings():
+    modulesList = {}
+    for k, v in config.items("modules"):
+        modulesList[k] =  getModules(k)
+    return render_template('settings.html', moduleList = modulesList)
+
 @app.route('/shutdown')
 def shutdown():
     os.system("shutdown now -h") 
@@ -158,13 +168,6 @@ def reboot():
 def close():
     os.system("pkill chromium") 
     return ""
-
-@app.route('/settings')
-def settings():
-    modulesList = {}
-    for k, v in config.items("modules"):
-        modulesList[k] =  getModules(k)
-    return render_template('settings.html', moduleList = modulesList)
 
 
 def startChromium():
@@ -196,7 +199,7 @@ if __name__ == "__main__":
     app.jinja_env.auto_reload = True
     app.config['TEMPLATES_AUTO_RELOAD'] = True
     
-    debugMode = True
+    debugMode = False
     if os.name != 'nt':
         thread = threading.Thread(target = startChromium, args=[])
         thread.start()
