@@ -37,7 +37,7 @@
         </div>
         <div class="row">
             <!-- Content Column -->
-            <div class="col-lg-6 col-md-6 mb-4">
+            <div class="col-lg-6 col-md-6 mb-4" id="dop-card" style="display:none">
                 <!-- Project Card Example -->
                 <div class="card  mb-4" style="height:200px">
                     <div class="card-header py-3">
@@ -48,12 +48,29 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-6 col-md-6 mb-4">
+            <div class="col-lg-6 col-md-6 mb-4" id="satelites-card" style="display:none;">
                 <div class="card  mb-4" style="height:200px">
-                    <div class="card-body">
-                        <div id="canvas-wrapper">
-                            <canvas id="canvas" height="200"
-                                style="top:-5; margin-top:-20; z-index: 99999999;"></canvas>
+                    <div class="card-body" id="satelites-map">
+                        <canvas id="canvas" height="200" style="top:-5; margin-top:-20; z-index: 99999999;"></canvas>
+                    </div>
+                    <div id="satelites-list" style="display:none">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm font-weight-bold  text-primary">
+                                    PRN &nbsp; AZ &nbsp;&nbsp; EL
+                                </div>
+                                <div class="col-sm font-weight-bold  text-primary">
+                                    PRN &nbsp; AZ &nbsp;&nbsp; EL
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm" id="list-left">
+                                    One of three columns
+                                </div>
+                                <div class="col-sm" id="list-right">
+                                    One of three columns
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -63,6 +80,14 @@
 </div>
 <script>
     var GPSData;
+
+    var canvasWrapperRect;
+    var ctx;
+    var centerX;
+    var centerY;
+    var radius = 80;
+
+
     function getGPSData() {
         ajax_get('get-gps', updateGPSInfo)
     }
@@ -95,6 +120,7 @@
                 for (dop in GPSData['dop']) {
                     dops += '<h4 class="small font-weight-bold text-uppercase">' + dop + ' <span class="float-right">' + GPSData['dop'][dop] + '</span></h4>' + "\n";
                 }
+                $("#dop-card").show();
             }
 
             if (GPSData.hasOwnProperty('time')) {
@@ -103,6 +129,7 @@
             }
 
             if (GPSData.hasOwnProperty('visible_satelites')) {
+                $("#satelites-card").show();
                 sateliteMap();
             }
 
@@ -120,6 +147,7 @@
         var x = centerX - radius * Math.sin(-angle * Math.PI / 180) * distance;
         var y = centerY - radius * Math.cos(-angle * Math.PI / 180) * distance;
 
+        // NANIESIENIE KOŁA
         ctx.beginPath();
         ctx.arc(x, y, 8, 0, 2 * Math.PI);
         ctx.fillStyle = "white";
@@ -128,15 +156,27 @@
         ctx.fillStyle = "black";
         ctx.strokeStyle = 'black';
 
+        // OBWÓDKA W PRZYPADKU UŻYWANEGO SATELITY
         if (used) {
             ctx.stroke();
         }
 
-        ctx.font = 13;
+        // NANIESIENIE NUMERU PRN
+        ctx.font = "10px Arial";
+        ctx.textAlign = "left";
         ctx.fillText(label, x - 6, y + 3);
+
     }
 
     function sateliteMap() {
+        canvasWrapperRect = document.getElementById('satelites-card').getBoundingClientRect();
+        canvas.width = canvasWrapperRect.width;
+
+        ctx = canvas.getContext('2d');
+        centerX = canvas.width / 2.5;
+        centerY = canvas.height / 2;
+
+        // RYSOWANIE OKRĘGU
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "black";
         ctx.strokeStyle = 'black';
@@ -144,6 +184,7 @@
         ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
         ctx.stroke();
 
+        // RYSOWANIE OKRĘGÓW CO 15 STOPNI
         ctx.strokeStyle = 'lightgray';
         var deltaDeg = 15;
         for (var i = deltaDeg; i < 90; i += deltaDeg) {
@@ -152,6 +193,7 @@
             ctx.stroke();
         }
 
+        // NANIESIENIE OSI 
         ctx.beginPath();
         ctx.strokeWidth = 1;
         x = Math.floor(centerX) + 0.5;
@@ -162,27 +204,47 @@
         ctx.lineTo(x + radius, y);
         ctx.stroke();
 
+
+        // NANIESIENIE KIERUNKÓW GEOGRAFICZNYCH
+        ctx.font = "bold 15px Roboto Condensed";
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#4E73DF";
+        ctx.fillText('N', centerX, y - radius - 6);
+        ctx.fillText('S', centerX, y + radius + 14);
+        ctx.fillText('E', centerX + radius + 9, centerY + 4);
+        ctx.fillText('W', centerX - radius - 10, centerY + 4);
+
+        // NANIESIENIE SATELITÓW + AKTUALIZACJA TABELI
+        var list_left = '';
+        var list_right = '';
+        var n = 0;
         var satelites = GPSData.hasOwnProperty('visible_satelites') ? GPSData['visible_satelites'] : false;
         if (satelites !== false && Object.keys(satelites).length > 0) {
-            for(key in satelites){
+            for (key in satelites) {
                 var u = false;
-                if(GPSData['used_satelites'].includes(key)){
+                if (GPSData['used_satelites'].includes(key)) {
                     u = true;
                 }
                 drawSatelite(satelites[key]['azimuth'], satelites[key]['elevation'], key, u);
+                var list = '<h4 class="small  text-uppercase' + (u == true ? ' font-weight-bold' : '') + '">' +
+                    key + ' &nbsp; &nbsp;&nbsp; &nbsp; ' + satelites[key]['azimuth'] + '° &nbsp; &nbsp;' + satelites[key]['elevation'] + '°</h4>' + "\n";
+                if (n > 5) {
+                    list_right += list;
+                } else {
+                    list_left += list;
+                }
+                n++;
             }
+            $("#list-left").html(list_left);
+            $("#list-right").html(list_right);
+
         }
     }
 
-    var canvasWrapperRect = document.getElementById('canvas-wrapper').getBoundingClientRect();
-    canvas.width = canvasWrapperRect.width;
-
-    var ctx = canvas.getContext('2d');
-    var centerX = canvas.width / 2;
-    var centerY = canvas.height / 2;
-    var radius = 90;
-
-
+    $("#satelites-card").click(function () {
+        $("#satelites-list").toggle();
+        $("#satelites-map").toggle();
+    });
 
     getGPSData();
 </script>
