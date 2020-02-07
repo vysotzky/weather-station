@@ -101,8 +101,11 @@
         var sensors = { 'temperature': 1000, 'pressure': 1000, 'humidity': 1000, 'heel': 25 };
         var fetchSensorsEverywhere = false;
 
-        // ------------- ///
+        /**      ---       **/
+        // LOAD SETTINGS
         var logbookFrequency = "{{get_config('general', 'logbookfrequency')|default('5', true)}}";
+        var temperatureUnit = "{{get_config('general', 'temperatureunit')|default('C', true)}}";
+
         var loading = false;
         var intervals = {};
         var logbook = {};
@@ -203,7 +206,14 @@
         });
 
         function setTemperature(value) {
-            updateUI('temperature', value, " °C");
+            var suffix = " °C";
+            
+            if(temperatureUnit == "F"){
+                suffix = " °F";
+                value = Math.round(value * 9/5 + 32);
+            }
+
+            updateUI('temperature', value, suffix);
         }
 
         function setPressure(value) {

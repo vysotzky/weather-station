@@ -124,6 +124,16 @@ def UISettingsSetLogbookFrequency(frequency):
             pass
     return str(freq)
 
+@app.route("/set-temperature-unit/<unit>")
+def UISettingsSetTemperatureUnit(unit):    
+    if unit == "F" or unit == "C":
+        try:
+            config.set("general", "temperatureUnit", unit)
+            saveConfig()
+        except:
+            pass
+    return unit
+
 @app.route('/save-modules', methods=['POST']) 
 def UISettingsSaveModules():
     modules = request.get_json(force=True)

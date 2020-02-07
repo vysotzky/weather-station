@@ -34,7 +34,7 @@
                 </select>
             </div>
             <p></p>
-            <h4>Ekran</h4>
+            <h4>Stacja</h4>
             <div class="box">
                 <label>
                     Jasność
@@ -45,10 +45,24 @@
                 </div>
             </div>
             <p></p>
-            <br />
+            <div class="select-box">
+                <label>Jednostka temperatury</label>
+                <select class="wide" name="temperatureUnit" id="temperatureUnit">
+                    <option value="C">°C</option>
+                    <option value="F">°F</option>
+                </select>
+            </div>
+            <div class="select-box">
+                <label>Język</label>
+                <select class="wide" name="temperatureUnit" id="temperatureUnit">
+                    <option value="pl">polski</option>
+                    <option value="eng">English</option>
+                </select>
+            </div>
+            <p></p>
             <h4>Moduły</h4>
             {% set modulOpis = ({"temperature":"Czujnik temperatury", "pressure":"Czujnik ciśnienia", "heel":"Czujnik przechylu", "humidity":"Czujnik wilgotnosci", 
-        "forecast":"Prognoza pogody", "Pozycja":"GPS"})	%}
+        "forecast":"Prognoza pogody", "gps":"Pozycja"})	%}
             {%for module in moduleList.items() %}
             <div class="select-box">
                 <label>
@@ -108,11 +122,22 @@
     $("#logFreq").val("{{get_config('general', 'logbookFrequency')}}").change();
     $('#logFreq').niceSelect('update');
 
+    $("#temperatureUnit").val("{{get_config('general', 'temperatureUnit')}}").change();
+    $('#temperatureUnit').niceSelect('update');
+
     $("#logFreq").on("change", function (event, ui) {
         var newFreq = $(this).val();
         if (newFreq >= 1) {
             logbookFrequency = newFreq;
             ajax_get('set-logbook-frequency/' + newFreq);
+        }
+    });
+
+    $("#temperatureUnit").on("change", function (event, ui) {
+        var newUnit = $(this).val();
+        if (newUnit == "F" || newUnit == "C") {
+            temperatureUnit = newUnit;
+            ajax_get('set-temperature-unit/' + newUnit);
         }
     });
 
