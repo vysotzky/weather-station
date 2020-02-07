@@ -20,11 +20,22 @@ app = Flask(__name__, static_url_path='',
 config_path = 'ustawienia.ini'
 
 config = ConfigParser(allow_no_value=True)
-config.read(config_path)
+config.read(config_path, encoding='utf-8')
+
+try:
+    lang_name = config.get('general', 'language')
+except:
+    lang_name = 'polski'
+
+lang = ConfigParser(allow_no_value=True)
+
+try:
+    lang.read('lang/'+lang_name+'.ini', encoding='utf-8')
+except:
+    pass
 
 module = {}
 errors = {}
-		
 for k, v in config.items("modules"):
     try:
         module[k] =  importlib.import_module("modules."+k+"."+v)
@@ -202,7 +213,13 @@ def utility_processor():
         except:
             value = ""
         return value
-    return dict(get_config=get_config)
+    def __lang(section, option):
+        try:
+            value = lang.get(section, option)
+        except:
+            value = section+"."+option
+        return value
+    return dict(get_config=get_config, __lang=__lang)
 
 @app.errorhandler(Exception)
 def exception_handler(error):
