@@ -1,4 +1,5 @@
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,9 +11,10 @@
     <link href="css/roboto-condensed-font.css" rel="stylesheet">
     <link href="css/sb-admin-2.min.css?2" rel="stylesheet">
     <link href="css/nice-select.css" rel="stylesheet">
+    <link href="css/dataTables.css" rel="stylesheet">
     <link href="css/misc.css" rel="stylesheet">
-    <link rel="icon" href="data:,">
 </head>
+
 <body id="page-top">
     <div id="content-wrapper" class="d-flex flex-column">
         <div id="content">
@@ -57,10 +59,10 @@
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title">Błąd podczas wczytywania modułów!</h5>
+                                <h5 class="modal-title">{{__lang("main", "modules_error")}}</h5>
                             </div>
                             <div class="modal-body">
-                                Wystąpił błąd podczas wczytywania następujących modułów:<br />
+                                {{__lang("main", "modules_error_desc")}}<br />
                                 <ul>
                                     {%for error in errorList.items() %}
                                     <li><strong>{{error[0]}}:</strong> {{error[1]}}</li>
@@ -68,7 +70,8 @@
                                 </ul>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-primary" data-dismiss="modal">Potwierdź</button>
+                                <button type="button" class="btn btn-primary"
+                                    data-dismiss="modal">{{__lang("main", "confirm")}}</button>
                             </div>
                         </div>
                     </div>
@@ -77,14 +80,15 @@
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title">Wyłączyć stację?</h5>
+                                <h5 class="modal-title">{{__lang("main", "turnoff_prompt")}}</h5>
                             </div>
                             <div class="modal-body">
-                                Urządzenie zostanie wyłączone
+                                {{__lang("main", "turnoff_prompt_desc")}}
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Anuluj</button>
-                                <a href="/shutdown" class="btn btn-danger">Wyłącz</a>
+                                <button type="button" class="btn btn-secondary"
+                                    data-dismiss="modal">{{__lang("main", "cancel")}}</button>
+                                <a href="/shutdown" class="btn btn-danger">{{__lang("main", "turnoff")}}</a>
 
                             </div>
                         </div>
@@ -97,6 +101,8 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/jquery.nice-select.min.js"></script>
+    <script src="js/jquery.dataTables.min.js"></script>
+    <script src="js/dataTables.bootstrap4.min.js"></script>
     <script>
         var sensors = { 'temperature': 1000, 'pressure': 1000, 'humidity': 1000, 'heel': 25 };
         var fetchSensorsEverywhere = false;
@@ -108,12 +114,15 @@
 
         var loading = false;
         var intervals = {};
-        var logbook = {};
+
         var working = {};
         var now = new Date();
         var fullDate = '';
         var currentScreen = '';
 
+        if (typeof logbook === 'undefined') {
+            var logbook = {};
+        }
 
         function ajax_get(query, callback) {
             var wQuery = query.split("/")[0];
@@ -152,7 +161,8 @@
             now.getHours() >= 12 ? "PM" : "AM"].join(" ");
 
 
-            var days = ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'];
+            var days = ['{{__lang("days", "sunday")}}', '{{__lang("days", "monday")}}', '{{__lang("days", "tuesday")}}', '{{__lang("days", "wednesday")}}',
+                '{{__lang("days", "thursday")}}', '{{__lang("days", "friday")}}', '{{__lang("days", "saturday")}}'];
             var dayName = days[now.getDay()];
             var hour = time = ('0' + now.getHours()).slice(-2) + ':' + ('0' + now.getMinutes()).slice(-2);
             var t = dayName.toUpperCase() + " &nbsp; " + hour;
@@ -171,7 +181,6 @@
 
             $("#screen").load(screen, function (response, status, xhr) {
                 if (status == "error") {
-                    var msg = "Wystąpił następujący błąd: ";
                     document.documentElement.innerHTML = response;
                     currentScreen = 'error';
                 } else {
@@ -207,10 +216,10 @@
 
         function setTemperature(value) {
             var suffix = " °C";
-            
-            if(temperatureUnit == "F"){
+
+            if (temperatureUnit == "F") {
                 suffix = " °F";
-                value = Math.round(value * 9/5 + 32);
+                value = Math.round(value * 9 / 5 + 32);
             }
 
             updateUI('temperature', value, suffix);
@@ -241,7 +250,7 @@
                     logbook[fullDate] = {};
                 }
                 if (!(field in logbook[fullDate])) {
-                    logbook[fullDate][field] = content; 
+                    logbook[fullDate][field] = content;
                 }
             }
         }
@@ -252,13 +261,14 @@
         }
 
 
-        {% if errorList | length > 0 %}
+        {% if errorList | length > 0 and start == 'sensors' %}
         $('#modulesErrorModal').modal('show');
         {% endif %}
 
         updateTime();
-        loadScreen('sensors');
+        loadScreen('{{start}}');
     </script>
     <div id="loading"></div>
 </body>
+
 </html>

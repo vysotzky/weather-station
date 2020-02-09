@@ -1,47 +1,64 @@
-<div class="modal fade " id="modulesSavedModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Zmiany zapisane</h5>
-            </div>
-            <div class="modal-body">
-                Nowe sterowniki zostaną wczytane po ponownym włączeniu urządzenia
-            </div>
-            <div class="modal-footer">
-                <a href="/reboot" class="btn btn-secondary">Zrestartuj urządzenie</a>
-                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-            </div>
-        </div>
-    </div>
-</div>
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Logbook</h1>
+    <h1 class="h3 mb-0 text-gray-800">{{__lang("settings", "logbook")}}</h1>
 </div>
-<div id="lb">
+<div id="scroll">
     <div class="row">
         <div class="col-xl-3 col-md-6 mb-4">
-            <div id="logbook">
-
-            </div>
+            <table id="logbook" class="table table-striped table-bordered" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>{{__lang("main", "time")}}</th>
+                        <th>{{__lang("sensors", "temperature")}}</th>
+                        <th>{{__lang("sensors", "pressure")}}</th>
+                        <th>{{__lang("sensors", "humidity")}}</th>
+                        <th>{{__lang("sensors", "heel")}}</th>
+                    </tr>
+                </thead>
+                <tbody id="entries">
+                </tbody>
+            </table>
         </div>
     </div>
     <script>
+
         function logbookToTable() {
-            var result = "<table border=1>";
+            var result = "";
+            var i = 0;
 
             for (var key in logbook) {
                 if (!logbook.hasOwnProperty(key)) continue;
+
                 var entry = logbook[key];
                 result += "<tr>";
+                result += "<td>" + (++i) + "</td>";
                 result += "<td><strong>" + key + "</strong></td>";
-                for (var field in entry) {
-                    if (!entry.hasOwnProperty(field)) continue;
-                    result += "<td>" + entry[field] + "</td>";
-                }
+                result += "<td>" + entry['temperature'] + "</td>";
+                result += "<td>" + entry['pressure'] + "</td>";
+                result += "<td>" + entry['humidity'] + "</td>";
+                result += "<td>" + entry['heel'] + "</td>";
                 result += "</tr>";
             }
-            result += "</table>";
-            $('#logbook').html(result); // And add to container
+            result += "";
+            $('#entries').html(result); // And add to container
         }
-        logbookToTable();
+        $(document).ready(function () {
+            logbookToTable();
+            $('#logbook').DataTable({
+                "order": [[0, "desc"]],
+                "paging": false,
+                "ordering": true,
+                "info": false,
+                "searching": false,
+                "columnDefs": [
+                    {
+                        "targets": [0],
+                        "visible": false,
+                        "searchable": false
+                    }, {
+                        "targets": [1],
+                        "orderData": [0]
+                    }]
+            });
+        });
     </script>

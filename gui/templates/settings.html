@@ -2,39 +2,39 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Zmiany zapisane</h5>
+                <h5 class="modal-title">{{__lang("settings", "changes_saved")}}</h5>
             </div>
             <div class="modal-body">
-                Nowe sterowniki zostaną wczytane po ponownym włączeniu urządzenia
+                {{__lang("settings", "changes_saved_desc")}}
             </div>
             <div class="modal-footer">
-                <a href="/reboot" class="btn btn-secondary">Zrestartuj urządzenie</a>
+                <a href="/reboot" class="btn btn-secondary">{{__lang("settings", "restart_device")}}</a>
                 <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
             </div>
         </div>
     </div>
 </div>
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Ustawienia</h1>
+    <h1 class="h3 mb-0 text-gray-800">{{__lang("settings", "title")}}</h1>
 </div>
 <div id="scroll">
     <div class="row">
         <div class="col-xl-3 col-md-6 mb-4">
-            <h4>Logbook</h4>
+            <h4>{{__lang("settings", "logbook")}}</h4>
             <div class="select-box">
-                <label>Częstotliwość zapisywania danych</label>
+                <label>{{__lang("settings", "logbookfrequency")}}</label>
                 <select class="wide" name="logFreq" id="logFreq">
-                    <option value="1">minuta</option>
-                    <option value="5">5 minut</option>
-                    <option value="10">10 minut</option>
-                    <option value="15">15 minut</option>
-                    <option value="30">30 minut</option>
-                    <option value="45">45 minut</option>
-                    <option value="60">godzina</option>
+                    <option value="1">{{__lang("settings", "freq_minute")}}</option>
+                    <option value="5">5 {{__lang("settings", "freq_minutes")}}</option>
+                    <option value="10">10 {{__lang("settings", "freq_minutes")}}</option>
+                    <option value="15">15 {{__lang("settings", "freq_minutes")}}</option>
+                    <option value="30">30 {{__lang("settings", "freq_minutes")}}</option>
+                    <option value="45">45 {{__lang("settings", "freq_minutes")}}</option>
+                    <option value="60">{{__lang("settings", "freq_hour")}}</option>
                 </select>
             </div>
             <p></p>
-            <h4>Stacja</h4>
+            <h4>{{__lang("settings", "station")}}</h4>
             <div class="box">
                 <label>
                     {{__lang("settings", "brightness")}}
@@ -46,48 +46,43 @@
             </div>
             <p></p>
             <div class="select-box">
-                <label>Jednostka temperatury</label>
+                <label>{{__lang("settings", "temperatureunit")}}</label>
                 <select class="wide" name="temperatureUnit" id="temperatureUnit">
                     <option value="C">°C</option>
                     <option value="F">°F</option>
                 </select>
             </div>
             <div class="select-box">
-                <label>Język</label>
-                <select class="wide" name="temperatureUnit" id="temperatureUnit">
-                    <option value="pl">polski</option>
-                    <option value="eng">English</option>
+                <label>{{__lang("settings", "language")}}</label>
+                <select class="wide" name="language" id="language">
+                    {%for lang in get_languages()%}
+                    <option value="{{lang}}">{{lang}}</option>
+                    {%endfor%}
                 </select>
             </div>
             <p></p>
-            <h4>Moduły</h4>
-            {% set modulOpis = ({"temperature":"Czujnik temperatury", "pressure":"Czujnik ciśnienia", "heel":"Czujnik przechylu", "humidity":"Czujnik wilgotnosci", 
-        "forecast":"Prognoza pogody", "gps":"Pozycja"})	%}
+            <h4>{{__lang("settings", "modules")}}</h4>
             {%for module in moduleList.items() %}
             <div class="select-box">
                 <label>
-                    {% if  modulOpis[module[0]] is defined %}
-                    {{ modulOpis[module[0]] }}
-                    {% else %}
-                    {{module[0]}}
-                    {%endif%}
+                    {{__lang("modules", module[0])}}
                 </label>
                 <select class="wide module" name="{{module[0]}}">
-                    {%for m in moduleList[module[0]].items() %}
-                    <option{%if m[1] == get_config("modules", module[0]) %} selected{%endif%}>{{m[1]}}</option>
+                    {%for m in moduleList[module[0]] %}
+                    <option{%if m == get_config("modules", module[0]) %} selected{%endif%}>{{m}}</option>
                         {%endfor%}
                 </select>
             </div>
             {%endfor%}
             <p></p>
             <button class="btn btn-secondary btn-md" id="save-modules">
-                Zastosuj moduły
+                {{__lang("settings", "save_modules")}}
             </button>
             <p></p>
         </div>
     </div>
     <hr>
-    <p class="text-uppercase font-weight-light">Informacje o urządzeniu</p>
+    <p class="text-uppercase font-weight-light">{{__lang("settings", "device_info")}}</p>
     <blockquote class="blockquote">
         <p class="mb-0"><strong>Statkowa stacja meteorologiczna w oparciu o mikrokomputer Raspberry Pi</strong></p>
         <p>Dorian Wysocki &nbsp; <img src="img/umg.png" style="height:2em; width:auto;" /> &nbsp; <cite>Uniwersytet
@@ -125,6 +120,9 @@
     $("#temperatureUnit").val("{{get_config('general', 'temperatureUnit')}}").change();
     $('#temperatureUnit').niceSelect('update');
 
+    $("#language").val("{{get_config('general', 'language')}}").change();
+    $('#language').niceSelect('update');
+
     $("#logFreq").on("change", function (event, ui) {
         var newFreq = $(this).val();
         if (newFreq >= 1) {
@@ -139,6 +137,24 @@
             temperatureUnit = newUnit;
             ajax_get('set-temperature-unit/' + newUnit);
         }
+    });
+
+    $("#language").on("change", function (event, ui) {
+        var newLang = $(this).val();
+        ajax_get('set-language/' + newLang, function (response) {
+            var scroll = $("#scroll").scrollTop();
+            $.get("/", function (data) {
+                document.open();
+                document.write(data);
+                document.close();
+                setTimeout(function () {
+                    $('#scroll').animate({
+                        scrollTop: scroll
+                    }, 1)
+                }, 500);
+            }, "text");
+        });
+
     });
 
     $("#brightness").on("change", function (event, ui) { ajax_get('set-brightness/' + brightness.value, setBrightness); });

@@ -11,28 +11,27 @@ try:
 except ImportError:
     from ConfigParser import ConfigParser  
 	
+# ----------------------------------------------------------- #
+
+default_lang = 'polski'
+config_path = 'settings.ini'
+start_screen = 'sensors'
+debug_mode = False
+
+# ----------------------------------------------------------- #
 
 app = Flask(__name__, static_url_path='',   
             static_folder='gui/static',
             template_folder='gui/templates')
 
-
-config_path = 'ustawienia.ini'
-
 config = ConfigParser(allow_no_value=True)
 config.read(config_path, encoding='utf-8')
+lang = ConfigParser(allow_no_value=True)
 
 try:
     lang_name = config.get('general', 'language')
 except:
-    lang_name = 'polski'
-
-lang = ConfigParser(allow_no_value=True)
-
-try:
-    lang.read('lang/'+lang_name+'.ini', encoding='utf-8')
-except:
-    pass
+    lang_name = default_lang
 
 module = {}
 errors = {}
@@ -43,15 +42,6 @@ for k, v in config.items("modules"):
         print("error: loading module "+v+" for "+k+" failed")
         print(sys.exc_info())
         errors[k] = v
-
-def getModules(name):
-    i=0
-    modules = {}
-    for module in os.listdir('modules/'+name):
-        if module.endswith(".py"):
-            modules[i] = module.replace(".py", "")
-            i+=1
-    return modules
 
 @app.route("/get-forecast/<lat>/<long>")
 def UIGetForecast(lat, long):
@@ -145,6 +135,23 @@ def UISettingsSetTemperatureUnit(unit):
             pass
     return unit
 
+@app.route("/set-language/<lang>")
+def UISettingsSetLanguage(lang):    
+    global lang_name, start_screen
+    if os.path.isfile('lang/'+lang+'.ini'):
+        try:
+            config.set("general", "language", lang)
+            saveConfig()
+
+            lang_name = lang
+            loadLanguage()
+            start_screen = 'settings'
+
+            return "success"
+        except:
+            pass
+    return "error"
+
 @app.route('/save-modules', methods=['POST']) 
 def UISettingsSaveModules():
     modules = request.get_json(force=True)
@@ -204,35 +211,58 @@ def saveConfig():
         config.write(configfile)
     return
 
-
-@app.context_processor
-def utility_processor():
-    def get_config(section, option):
+def getConfigOption(section, option):
         try:
             value = config.get(section, option)
         except:
             value = ""
         return value
+
+def getLanguagesList():
+        langs = []
+        for file in os.listdir('lang'):
+            if file.endswith(".ini"):
+                langs.append(file.replace(".ini", ""))
+        return langs
+
+def getModules(name):
+    modules = []
+    for module in os.listdir('modules/'+name):
+        if module.endswith(".py"):
+            modules.append(module.replace(".py", ""))
+    return modules
+
+def loadLanguage():
+    try:
+        lang.read('lang/'+lang_name+'.ini', encoding='utf-8')
+    except:
+        pass
+
+
+@app.context_processor
+def utility_processor():
     def __lang(section, option):
         try:
             value = lang.get(section, option)
         except:
             value = section+"."+option
+            print(value + " missing in lang "+lang_name)
         return value
-    return dict(get_config=get_config, __lang=__lang)
+    return dict(get_config=getConfigOption, get_languages = getLanguagesList,  __lang=__lang, start = start_screen)
 
 @app.errorhandler(Exception)
 def exception_handler(error):
     print(error)
     return render_template('error.html', error=error), 500
 
+
 if __name__ == "__main__":
+    loadLanguage()
+
     app.jinja_env.auto_reload = True
     app.config['TEMPLATES_AUTO_RELOAD'] = True
-    
-    debugMode = False
     if os.name != 'nt':
         thread = threading.Thread(target = startChromium, args=[])
         thread.start()
-        debugMode = False
-    app.run(host= '0.0.0.0', port=int("80"), debug=debugMode)
+        debug_mode = False
+    app.run(host= '0.0.0.0', port=int("80"), debug=debug_mode)

@@ -1,6 +1,6 @@
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Dane z odbiornika GPS</h1>
-    <span class="float-right text-uppercase" id="last_update" style="display:none;">Ostatnia aktualizacja <span
+    <h1 class="h3 mb-0 text-gray-800">{{__lang("gps", "title")}}</h1>
+    <span class="float-right text-uppercase" id="last_update" style="display:none;">{{__lang("gps", "last_update")}} <span
             id="gps_time" class="font-weight-bold"></span> UTC</span>
 </div>
 <div id="no-scroll">
@@ -12,7 +12,7 @@
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
                                 <div class="h6 font-weight-bold text-primary text-uppercase mb-1">
-                                    Pozycja
+                                    {{__lang("gps", "position")}}
                                 </div>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800" id="position">-</div>
                             </div>
@@ -26,7 +26,7 @@
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
                                 <div class="h6 font-weight-bold text-primary text-uppercase mb-1">
-                                    Prędkość nad dnem (KT)
+                                    {{__lang("gps", "sog")}} (KT)
                                 </div>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800" id="speed">-</div>
                             </div>
@@ -41,7 +41,7 @@
                 <!-- Project Card Example -->
                 <div class="card  mb-4" style="height:200px">
                     <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary text-uppercase">Wartości DOP</h6>
+                        <h6 class="m-0 font-weight-bold text-primary text-uppercase">{{__lang("gps", "dop")}}</h6>
                     </div>
                     <div class="card-body" id="dop">
                         <h1 style="text-align:center">-</h1>
@@ -64,12 +64,8 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-sm" id="list-left">
-                                    One of three columns
-                                </div>
-                                <div class="col-sm" id="list-right">
-                                    One of three columns
-                                </div>
+                                <div class="col-sm" id="list-left"></div>
+                                <div class="col-sm" id="list-right"></div>
                             </div>
                         </div>
                     </div>
