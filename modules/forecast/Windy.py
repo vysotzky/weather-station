@@ -3,12 +3,11 @@ from selenium.webdriver.common.keys import Keys
 import time 
 import os
 from pprint import pprint
-from collections import defaultdict 
 import re
 from selenium.webdriver.chrome.options import Options
 
 chrome_options = Options()
-chrome_options.add_argument("--headless")
+#chrome_options.add_argument("--headless")
 
 if os.name != 'nt':
     chrome_options.add_argument('--disable-features=VizDisplayCompositor')
@@ -20,14 +19,10 @@ else:
 
 working = False
 
-def multi_dict(K, type): 
-    if K == 1: 
-        return defaultdict(type) 
-    else: 
-        return defaultdict(lambda: multi_dict(K-1, type)) 
-
 def getForecast(lat, long):
     global driver, working
+
+
     if working == True:
         return False
     working = True
@@ -35,23 +30,52 @@ def getForecast(lat, long):
     driver.get(url)
     driver.implicitly_wait(10)
 
-    forecast = multi_dict(2, str)
+    forecast = []
 
+    hour_table = driver.find_element_by_xpath('//*[starts-with(@class,"td-hour")]')
     temp_table = driver.find_element_by_xpath('//*[starts-with(@class,"td-temp")]')
     rain_table = driver.find_element_by_xpath('//*[starts-with(@class,"td-rain")]')
     wind_table = driver.find_element_by_xpath('//*[starts-with(@class,"td-wind")]')
     windDir_table = driver.find_element_by_xpath('//*[starts-with(@class,"td-windDir")]')
 
+    time.sleep(1)
+    now = driver.find_element_by_xpath("//div[@class='timecode main-timecode noselect desktop-timecode']/div")
+    try:
+        now = int(now.text.replace(':00', ''))
+    except:
+        print("err in reading time")
+        print(now)
+        print(now.text)
+        now = int(time.strftime("%H"))
+
+    hours = hour_table.find_elements_by_tag_name("td")
     temperatures = temp_table.find_elements_by_tag_name("td")
     rain = rain_table.find_elements_by_tag_name("td")
     wind = wind_table.find_elements_by_tag_name("td")
     windDir = windDir_table.find_elements_by_tag_name("td")
 
+    x = 0
+    day = 0
+    while True:
+        forecast_item = {}
+        try:
+            forecast_time = hours[x].text
+        except:
+            break
+        if x > 0 and int(hours[x].text) - int(hours[x-1].text) < 0:
+            day = day + 1
+        relative_time = day*24 + int(forecast_time) - now
 
-    for x in range(12):
-        forecast[x]["temperature"] = temperatures[x].text
-        forecast[x]["rain"] = rain[x].text
-        forecast[x]["wind"] = wind[x].text
+        if relative_time <= -3:
+            x=x+1
+            continue
+        if relative_time > 12:
+            break
+
+        forecast_item["delta_time"] = relative_time
+        forecast_item["temperature"] = temperatures[x].text
+        forecast_item["rain"] = rain[x].text
+        forecast_item["wind"] = wind[x].text
 
         # określenie kierunku wiatru
         div = windDir[x].find_element_by_tag_name("div")
@@ -64,13 +88,9 @@ def getForecast(lat, long):
         if deg >= 360:
             deg -= 360
 
-        forecast[x]["windDir"] = deg
-    #driver.quit()
+        forecast_item["windDir"] = deg
+
+        forecast.append(forecast_item)
+        x = x + 1
     working = False
     return(forecast)
-
-
-# elem = driver.find_element_by_name("q")
-# elem.clear()
-# elem.send_keys("pycon")
-# elem.send_keys(Keys.RETURN)

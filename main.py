@@ -5,6 +5,7 @@ import threading
 import os
 import sys
 import json
+import traceback
 
 try:
     from configparser import ConfigParser
@@ -43,12 +44,20 @@ for k, v in config.items("modules"):
         print(sys.exc_info())
         errors[k] = v
 
+
+@app.route("/get-forecast/")
 @app.route("/get-forecast/<lat>/<long>")
-def UIGetForecast(lat, long):
+def UIGetForecast(lat = "", long = ""):
+    if lat == "" and long == "":
+        gps = getGPSData()
+        lat = str(gps['latitude'])
+        long = str(gps['longitude'])
+        print(gps)
     try:
         forecast = module['forecast'].getForecast(lat, long)
-        var = str(forecast[0]["temperature"])
+        var = json.dumps(forecast)
     except:
+        print(traceback.format_exc())
         var = "error"
     return var
 
@@ -87,11 +96,14 @@ def UIGetHeel():
 
 @app.route("/get-gps")
 def UIGetGPSData():
+    return getGPSData()
+
+def getGPSData():
     try:
         gps = module['gps'].getGPSData()
     except:
         gps = "error"
-    return  json.dumps(gps)
+    return  gps
 
 @app.route("/set-brightness/<brightness>")
 def UISettingsSetBrightness(brightness):
@@ -202,6 +214,7 @@ def close():
     return ""
 
 
+
 def startChromium():
     os.system('chromium-browser  --kiosk --no-sandbox --test-type http://localhost/# –overscroll-history-navigation=0')
     return
@@ -261,6 +274,7 @@ if __name__ == "__main__":
 
     app.jinja_env.auto_reload = True
     app.config['TEMPLATES_AUTO_RELOAD'] = True
+
     if os.name != 'nt':
         thread = threading.Thread(target = startChromium, args=[])
         thread.start()
