@@ -2,8 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from collections import defaultdict 
 import importlib
 import threading
-import os
-import sys
+import os, subprocess, sys
 import json
 import traceback
 
@@ -103,7 +102,7 @@ def getGPSData():
         gps = module['gps'].getGPSData()
     except:
         gps = "error"
-    return  gps
+    return  json.dumps(gps)
 
 @app.route("/set-brightness/<brightness>")
 def UISettingsSetBrightness(brightness):
@@ -191,12 +190,16 @@ def logbook():
 def gps():
     return render_template('gps.html')
 
+@app.route('/forecast')
+def forecast():
+    return render_template('forecast.html')
+
 @app.route('/settings')
 def settings():
     modulesList = {}
     for k, v in config.items("modules"):
         modulesList[k] =  getModules(k)
-    return render_template('settings.html', moduleList = modulesList)
+    return render_template('settings.html', moduleList = modulesList, ssid = getWifiName())
 
 @app.route('/shutdown')
 def shutdown():
@@ -214,6 +217,13 @@ def close():
     return ""
 
 
+def getWifiName():
+    try:
+        output = str(subprocess.check_output(['iwgetid']))
+        ssid = output.split('"')[1]
+    except:
+        ssid = False
+    return ssid
 
 def startChromium():
     os.system('chromium-browser  --kiosk --no-sandbox --test-type http://localhost/# –overscroll-history-navigation=0')

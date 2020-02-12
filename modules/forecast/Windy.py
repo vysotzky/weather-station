@@ -7,7 +7,7 @@ import re
 from selenium.webdriver.chrome.options import Options
 
 chrome_options = Options()
-#chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")
 
 if os.name != 'nt':
     chrome_options.add_argument('--disable-features=VizDisplayCompositor')
@@ -22,13 +22,14 @@ working = False
 def getForecast(lat, long):
     global driver, working
 
-
     if working == True:
         return False
     working = True
     url = "https://www.windy.com/"+lat+"/"+long+"?"+lat+","+long+",9"
     driver.get(url)
+    
     driver.implicitly_wait(10)
+    time.sleep(1)
 
     forecast = []
 
@@ -38,14 +39,10 @@ def getForecast(lat, long):
     wind_table = driver.find_element_by_xpath('//*[starts-with(@class,"td-wind")]')
     windDir_table = driver.find_element_by_xpath('//*[starts-with(@class,"td-windDir")]')
 
-    time.sleep(1)
     now = driver.find_element_by_xpath("//div[@class='timecode main-timecode noselect desktop-timecode']/div")
     try:
         now = int(now.text.replace(':00', ''))
     except:
-        print("err in reading time")
-        print(now)
-        print(now.text)
         now = int(time.strftime("%H"))
 
     hours = hour_table.find_elements_by_tag_name("td")
@@ -58,12 +55,15 @@ def getForecast(lat, long):
     day = 0
     while True:
         forecast_item = {}
+
         try:
-            forecast_time = hours[x].text
+            forecast_time = int(hours[x].text)
         except:
             break
+
         if x > 0 and int(hours[x].text) - int(hours[x-1].text) < 0:
             day = day + 1
+
         relative_time = day*24 + int(forecast_time) - now
 
         if relative_time <= -3:

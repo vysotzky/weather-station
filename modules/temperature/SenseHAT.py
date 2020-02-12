@@ -8,11 +8,15 @@ def getCPUtemperature():
     return(res.replace("temp=","").replace("'C\n",""))
                                                                                                                         
 def getTemperature():
-    #T aktualna = (T odczytana - C * T cpu) / (1 - C)    gdzie C - obliczony wspolczynnik
-    C = 0.235
     cpuTemp=int(float(getCPUtemperature()))                                                                                    
-    ambient = sense.get_temperature_from_pressure()                                                                                                                                   
+    ambient = sense.get_temperature()     
+    #####  PIERWSZY SPOSÓB - NIEUŻYWANNY
+    #T aktualna = (T odczytana - C * T cpu) / (1 - C)    gdzie C - obliczony wspolczynnik
+
+    C = 0.235                                                                                                           
     calctemp = (ambient - C * cpuTemp ) / (1 - C)
+    calctemp = ambient - ((cpuTemp - ambient))/1.08122
+
     return round(calctemp)
 
 

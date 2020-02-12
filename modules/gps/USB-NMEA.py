@@ -63,3 +63,8 @@ thread.start_new_thread(read_nmea_thread, ())
 
 def getGPSData():
     return data
+
+if __name__ == "__main__":
+    while 1:
+        time.sleep(1)
+        print(getGPSData())

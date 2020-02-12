@@ -1,0 +1,91 @@
+<style>
+#forecast-table td, #forecast-table th{
+    text-align:center;
+    vertical-align:middle;
+}
+</style>
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">{{__lang("forecast", "title")}}</h1>
+</div>
+<div id="scroll">
+    <div id="loading">{{__lang("forecast", "loading")}}</div>
+    <div id="forecast">
+        <table id="forecast-table" class="table table-striped table-bordered" style="width:100%">
+            <thead>
+                <tr id="hours"></tr>
+            </thead>
+            <tbody>
+                <tr id="entry-temperature"></tr>
+                <tr id="entry-rain"></tr>
+                <tr id="entry-wind-force"></tr>
+                <tr id="entry-wind-dir"></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+
+    function forecastForGPSPosition() {
+        ajax_get('get-gps', function (gpsdata) {
+            try {
+                GPSData = JSON.parse(gpsdata);
+                getForecast(GPSData['latitude'], GPSData['longitude']);
+            } catch {
+                $("#loading").html("{{__lang('forecast', 'gps_error')}}");
+                return;
+            }
+        });
+    }
+
+    function getForecast(lat, long) {
+        $("#loading").show();
+        $("#table").hide();
+        ajax_get('get-forecast/' + lat + '/' + long, updateForecast)
+    }
+
+    function updateForecast(data) {
+      
+        $("#loading").hide();
+        $("#table").show();
+        forecast = JSON.parse(data);
+        
+        if(forecast == false){
+            $("#loading").html("{{__lang('forecast', 'forecast_error')}}");
+            setTimeout(reloadScreen(), 4000);
+        }
+
+        var date = new Date();
+        var current_hour = date.getHours();
+
+        $("#hours").append("<th>{{__lang('forecast', 'hour')}}</th>");
+        $("#entry-temperature").append("<th>{{__lang('forecast', 'temperature')}}</th>");
+        $("#entry-rain").append("<th>{{__lang('forecast', 'rain')}}</th>");
+        $("#entry-wind-force").append("<th>{{__lang('forecast', 'wind_force')}}</th>");
+        $("#entry-wind-dir").append("<th>{{__lang('forecast', 'wind_dir')}}</th>");
+
+        for (var entry of forecast){
+            var hour = current_hour + entry.delta_time;
+            if(hour<0){
+                hour+=24;
+            } else if(hour > 23) {
+                hour -= 24;
+            }
+    
+            var time = AddZero(hour).toString() + ":00";
+            var rain = (entry.rain != '' ? entry.rain : '-');
+            if(rain != '-' && rain.slice(-2) != 'cm'){
+                rain =rain.toString() + ' mm';
+            }
+
+            $("#hours").append("<th>"+time+"</th>");
+            $("#entry-temperature").append("<td>"+entry.temperature+" C</td>");
+            $("#entry-rain").append("<td>"+rain+"</td>");
+            $("#entry-wind-force").append("<td>"+entry.wind+" kt</td>");
+            $("#entry-wind-dir").append('<td><i class="fas fa-long-arrow-alt-up" style="transform: rotate('+entry.windDir+'deg); font-size:30px; color:blue"></i></td>');
+        }
+    }
+
+    $("document").ready(function () {
+        forecastForGPSPosition();
+    });
+</script>

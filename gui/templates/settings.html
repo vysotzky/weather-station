@@ -87,6 +87,14 @@
         <p class="mb-0"><strong>Statkowa stacja meteorologiczna w oparciu o mikrokomputer Raspberry Pi</strong></p>
         <p>Dorian Wysocki &nbsp; <img src="img/umg.png" style="height:2em; width:auto;" /> &nbsp; <cite>Uniwersytet
                 Morski w Gdyni</cite></p>
+        {%if ssid%}
+        <p class="text-success"><i class="fas fa-wifi"></i> {{__lang('settings', 'internet_connected')}} <strong>{{ssid}}</strong></p>
+        {%else%}
+        <p class="text-danger"><i class="fas fa-wifi"></i> {{__lang('settings', 'internet_fail')}}</p>
+        {%endif%}
+        <a href="/close" class="btn btn-outline-primary btn-sm text-uppercase">
+            {{__lang("settings", "service_mode")}}
+        </a>
     </blockquote>
 </div>
 <script>
