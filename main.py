@@ -43,7 +43,6 @@ for k, v in config.items("modules"):
         print(sys.exc_info())
         errors[k] = v
 
-
 @app.route("/get-forecast/")
 @app.route("/get-forecast/<lat>/<long>")
 def UIGetForecast(lat = "", long = ""):
@@ -216,7 +215,6 @@ def close():
     os.system("pkill chromium") 
     return ""
 
-
 def getWifiName():
     try:
         output = str(subprocess.check_output(['iwgetid']))
@@ -261,7 +259,6 @@ def loadLanguage():
     except:
         pass
 
-
 @app.context_processor
 def utility_processor():
     def __lang(section, option):
@@ -277,7 +274,6 @@ def utility_processor():
 def exception_handler(error):
     print(error)
     return render_template('error.html', error=error), 500
-
 
 if __name__ == "__main__":
     loadLanguage()
