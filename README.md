@@ -1,7 +1,7 @@
 ### Statkowa stacja meteorologiczna zbudowana w oparciu o mikrokomputer Raspberry Pi
 #### Oprogramowanie
 
-Projekt jest częścią pracy inżynierskiej. Oprogramowanie sterujące napisane zostało w języku Python z wykorzystaniem frameworka Flask, który inicjuje serwer z interfejsem graficznym stworzonym w HTML, CSS (Bootstrap) i JS.
+Projekt jest częścią pracy inżynierskiej. Oprogramowanie sterujące napisane zostało w języku Python z wykorzystaniem frameworka Flask, który inicjuje serwer z interfejsem graficznym stworzonym w HTML, CSS (Bootstrap) i JS (jQuery).
 
 <p align="center">
   <img height="480" src="https://user-images.githubusercontent.com/22153965/76769792-2cf4f980-679d-11ea-9ce8-8f4bcd4de95e.png">
