@@ -22,14 +22,12 @@
     </div>
 </div>
     <script>
-
         function logbookToTable() {
             var result = "";
             var i = 0;
 
             for (var key in logbook) {
                 if (!logbook.hasOwnProperty(key)) continue;
-
                 var entry = logbook[key];
                 result += "<tr>";
                 result += "<td>" + (++i) + "</td>";
@@ -43,6 +41,7 @@
             result += "";
             $('#entries').html(result); // And add to container
         }
+        
         $(document).ready(function () {
             logbookToTable();
             $('#logbook').DataTable({
