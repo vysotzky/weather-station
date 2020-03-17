@@ -83,7 +83,6 @@ def UIGetHumidity():
         humidity = "error"
     return str(humidity)
 
-    
 @app.route("/get-heel")
 def UIGetHeel():
     try:
