@@ -13,7 +13,6 @@
     <link href="css/dataTables.css" rel="stylesheet">
     <link href="css/misc.css" rel="stylesheet">
 </head>
-
 <body id="page-top">
     <div id="content-wrapper" class="d-flex flex-column">
         <div id="content">
@@ -128,7 +127,6 @@
             if (working[wQuery] == true) {
                 return;
             }
-
             working[wQuery] = true;
             const Http = new XMLHttpRequest();
             const url = query;
@@ -141,10 +139,8 @@
                     }
                 }
                 working[wQuery] = false;
-
             }
         }
-
 
         function AddZero(num) {
             return (num >= 0 && num < 10) ? "0" + num : num + "";
@@ -219,12 +215,10 @@
 
         function setTemperature(value) {
             var suffix = " °C";
-
             if (temperatureUnit == "F") {
                 suffix = " °F";
                 value = Math.round(value * 9 / 5 + 32);
             }
-
             updateUI('temperature', value, suffix);
         }
 
@@ -247,7 +241,6 @@
             if (fieldElement) {
                 fieldElement.innerHTML = content;
             }
-
             if (now.getMinutes() % logbookFrequency === 0) {
                 if (!(fullDate in logbook)) {
                     logbook[fullDate] = {};
@@ -263,7 +256,6 @@
             ajax_get('get-' + sensor, window[func]);
         }
 
-
         {% if errorList | length > 0 and start == 'sensors' %}
         $('#modulesErrorModal').modal('show');
         {% endif %}
@@ -273,5 +265,4 @@
     </script>
     <div id="loading"></div>
 </body>
-
 </html>
