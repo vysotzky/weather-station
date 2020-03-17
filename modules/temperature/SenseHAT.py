@@ -10,15 +10,14 @@ def getCPUtemperature():
 def getTemperature():
     cpuTemp=int(float(getCPUtemperature()))                                                                                    
     ambient = sense.get_temperature()     
-    #####  PIERWSZY SPOSÓB - NIEUŻYWANNY
-    #T aktualna = (T odczytana - C * T cpu) / (1 - C)    gdzie C - obliczony wspolczynnik
-
+    
+    ## KALIBRACJA TEMPERATURY
+    #  T aktualna = (T odczytana - C * T cpu) / (1 - C)    gdzie C - obliczony wspolczynnik
     C = 0.235                                                                                                           
     calctemp = (ambient - C * cpuTemp ) / (1 - C)
     calctemp = ambient - ((cpuTemp - ambient))/1.08122
 
     return round(calctemp)
-
 
 if __name__ == "__main__":
     while 1:
