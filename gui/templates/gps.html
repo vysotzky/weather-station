@@ -76,13 +76,11 @@
 </div>
 <script>
     var GPSData;
-
     var canvasWrapperRect;
     var ctx;
     var centerX;
     var centerY;
     var radius = 80;
-
 
     function getGPSData() {
         ajax_get('get-gps', updateGPSInfo)
@@ -98,7 +96,6 @@
         } catch {
             GPSData = false;
         }
-
 
         if (GPSData) {
             var position, speed = '-';
@@ -136,7 +133,6 @@
         setTimeout(getGPSData, 1000);
     }
 
-
     function drawSatelite(azimuth, elevation, label, used = false) {
         var distance = 1 - elevation / 90;
         var angle = azimuth;
@@ -161,7 +157,6 @@
         ctx.font = "10px Arial";
         ctx.textAlign = "left";
         ctx.fillText(label, x - 6, y + 3);
-
     }
 
     function sateliteMap() {
@@ -200,7 +195,6 @@
         ctx.lineTo(x + radius, y);
         ctx.stroke();
 
-
         // NANIESIENIE KIERUNKÓW GEOGRAFICZNYCH
         ctx.font = "bold 15px Roboto Condensed";
         ctx.textAlign = "center";
@@ -233,7 +227,6 @@
             }
             $("#list-left").html(list_left);
             $("#list-right").html(list_right);
-
         }
     }
 
