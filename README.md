@@ -30,3 +30,6 @@ Projekt jest częścią pracy inżynierskiej. Oprogramowanie sterujące napisane
 <p align="center">
   <img height="300" src="https://user-images.githubusercontent.com/22153965/76771015-020ba500-679f-11ea-9c03-68435fbad22a.png">
 </p>
+<p align="center">
+  <img height="480" src="https://user-images.githubusercontent.com/22153965/82134758-7d1f2500-97fb-11ea-86ee-4eb387d529a3.png">
+</p>
